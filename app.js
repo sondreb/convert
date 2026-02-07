@@ -28,10 +28,12 @@ async function loadFFmpeg() {
         ffmpeg = new FFmpeg();
 
         const baseURL = 'https://unpkg.com/@ffmpeg/core@0.12.10/dist/esm';
-        const classWorkerURL = await toBlobURL(
-            'https://unpkg.com/@ffmpeg/ffmpeg@0.12.15/dist/esm/worker.js',
-            'text/javascript'
+        const workerURL = 'https://unpkg.com/@ffmpeg/ffmpeg@0.12.15/dist/esm/worker.js';
+        const workerBlob = new Blob(
+            [`import "${workerURL}";`],
+            { type: 'text/javascript' }
         );
+        const classWorkerURL = URL.createObjectURL(workerBlob);
         await ffmpeg.load({
             classWorkerURL,
             coreURL: await toBlobURL(`${baseURL}/ffmpeg-core.js`, 'text/javascript'),
