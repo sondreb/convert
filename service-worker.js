@@ -18,7 +18,7 @@ self.addEventListener('install', (event) => {
         return cache.addAll(ASSETS);
       })
       .catch((error) => {
-        console.log('Cache install failed:', error);
+        console.error('Cache install failed:', error, 'Failed assets:', ASSETS);
       })
   );
   self.skipWaiting();

@@ -98,16 +98,25 @@ function renderFiles() {
                 <rect x="1" y="5" width="15" height="14" rx="2" ry="2"></rect>
             </svg>
             <div class="file-info">
-                <div class="file-name">${file.name}</div>
-                <div class="file-size">${formatFileSize(file.size)}</div>
+                <div class="file-name"></div>
+                <div class="file-size"></div>
             </div>
-            <button class="remove-btn" onclick="removeFile(${index})">
+            <button class="remove-btn">
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                     <line x1="18" y1="6" x2="6" y2="18"></line>
                     <line x1="6" y1="6" x2="18" y2="18"></line>
                 </svg>
             </button>
         `;
+        
+        // Safely set text content
+        item.querySelector('.file-name').textContent = file.name;
+        item.querySelector('.file-size').textContent = formatFileSize(file.size);
+        
+        // Add event listener instead of inline onclick
+        const removeBtn = item.querySelector('.remove-btn');
+        removeBtn.addEventListener('click', () => removeFile(index));
+        
         filesList.appendChild(item);
     });
 }
@@ -200,7 +209,11 @@ async function convertVideo(file, settings, index) {
         }
 
         // Audio codec
-        args.push('-c:a', 'aac');
+        if (settings.codec === 'copy') {
+            args.push('-c:a', 'copy');
+        } else {
+            args.push('-c:a', 'aac');
+        }
 
         // Resolution
         if (settings.resolution) {
@@ -290,10 +303,10 @@ function showResults(results) {
                     <polyline points="22 4 12 14.01 9 11.01"></polyline>
                 </svg>
                 <div class="result-info">
-                    <div class="result-name">${result.name}</div>
-                    <div class="result-status">${formatFileSize(result.size)}</div>
+                    <div class="result-name"></div>
+                    <div class="result-status"></div>
                 </div>
-                <button class="download-btn" onclick="downloadFile('${result.url}', '${result.name}')">
+                <button class="download-btn">
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                         <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
                         <polyline points="7 10 12 15 17 10"></polyline>
@@ -302,6 +315,14 @@ function showResults(results) {
                     Download
                 </button>
             `;
+            
+            // Safely set text content
+            item.querySelector('.result-name').textContent = result.name;
+            item.querySelector('.result-status').textContent = formatFileSize(result.size);
+            
+            // Add event listener instead of inline onclick
+            const downloadBtn = item.querySelector('.download-btn');
+            downloadBtn.addEventListener('click', () => downloadFile(result.url, result.name));
         } else {
             item.innerHTML = `
                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color: #f56565;">
@@ -310,10 +331,13 @@ function showResults(results) {
                     <line x1="9" y1="9" x2="15" y2="15"></line>
                 </svg>
                 <div class="result-info">
-                    <div class="result-name">${result.name}</div>
+                    <div class="result-name"></div>
                     <div class="result-status" style="color: #f56565;">Conversion failed</div>
                 </div>
             `;
+            
+            // Safely set text content
+            item.querySelector('.result-name').textContent = result.name;
         }
 
         resultsList.appendChild(item);
