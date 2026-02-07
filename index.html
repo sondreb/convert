@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Convert videos to different formats instantly in your browser">
+    <meta name="theme-color" content="#667eea">
+    <title>Convert - Video Converter</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="manifest" href="manifest.json">
+    <link rel="icon" type="image/svg+xml" href="icon.svg">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>
+                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                    <polyline points="14 2 14 8 20 8"></polyline>
+                    <path d="M12 18v-6"></path>
+                    <path d="M9 15l3 3 3-3"></path>
+                </svg>
+                Convert
+            </h1>
+            <p>Transform videos instantly</p>
+        </header>
+
+        <main>
+            <div id="dropzone" class="dropzone">
+                <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                    <polyline points="17 8 12 3 7 8"></polyline>
+                    <line x1="12" y1="3" x2="12" y2="15"></line>
+                </svg>
+                <h2>Drop video files here</h2>
+                <p>or click to browse</p>
+                <input type="file" id="fileInput" multiple accept="video/*" hidden>
+            </div>
+
+            <div id="filesSection" class="files-section hidden">
+                <h3>Files</h3>
+                <div id="filesList" class="files-list"></div>
+            </div>
+
+            <div id="settingsSection" class="settings-section hidden">
+                <h3>Conversion Settings</h3>
+                <div class="settings-grid">
+                    <div class="setting-group">
+                        <label for="outputFormat">Format</label>
+                        <select id="outputFormat">
+                            <option value="mp4">MP4 (H.264)</option>
+                            <option value="webm">WebM (VP9)</option>
+                            <option value="avi">AVI</option>
+                            <option value="mov">MOV</option>
+                        </select>
+                    </div>
+
+                    <div class="setting-group">
+                        <label for="videoCodec">Video Codec</label>
+                        <select id="videoCodec">
+                            <option value="libx264">H.264 (libx264)</option>
+                            <option value="libvpx-vp9">VP9 (libvpx-vp9)</option>
+                            <option value="libx265">H.265 (libx265)</option>
+                            <option value="copy">Copy (no re-encode)</option>
+                        </select>
+                    </div>
+
+                    <div class="setting-group">
+                        <label for="quality">Quality</label>
+                        <select id="quality">
+                            <option value="high">High</option>
+                            <option value="medium" selected>Medium</option>
+                            <option value="low">Low</option>
+                        </select>
+                    </div>
+
+                    <div class="setting-group">
+                        <label for="resolution">Resolution</label>
+                        <select id="resolution">
+                            <option value="">Original</option>
+                            <option value="1920x1080">1080p</option>
+                            <option value="1280x720">720p</option>
+                            <option value="854x480">480p</option>
+                        </select>
+                    </div>
+                </div>
+
+                <button id="convertBtn" class="convert-btn">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M21.5 2v6h-6M2.5 22v-6h6M2 11.5a10 10 0 0 1 18.8-4.3M22 12.5a10 10 0 0 1-18.8 4.2"/>
+                    </svg>
+                    Convert All
+                </button>
+            </div>
+
+            <div id="progressSection" class="progress-section hidden">
+                <h3>Converting...</h3>
+                <div id="progressList" class="progress-list"></div>
+            </div>
+
+            <div id="resultsSection" class="results-section hidden">
+                <h3>Completed</h3>
+                <div id="resultsList" class="results-list"></div>
+            </div>
+        </main>
+
+        <div id="loadingOverlay" class="loading-overlay hidden">
+            <div class="spinner"></div>
+            <p>Loading FFmpeg...</p>
+        </div>
+    </div>
+
+    <script type="module" src="app.js"></script>
+</body>
+</html>
