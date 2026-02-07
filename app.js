@@ -28,9 +28,11 @@ async function loadFFmpeg() {
         ffmpeg = new FFmpeg();
 
         const baseURL = 'https://unpkg.com/@ffmpeg/core@0.12.6/dist/esm';
+        const workerURL = 'https://unpkg.com/@ffmpeg/ffmpeg@0.12.10/dist/esm/worker.js';
         await ffmpeg.load({
             coreURL: await toBlobURL(`${baseURL}/ffmpeg-core.js`, 'text/javascript'),
             wasmURL: await toBlobURL(`${baseURL}/ffmpeg-core.wasm`, 'application/wasm'),
+            workerURL: await toBlobURL(workerURL, 'text/javascript'),
         });
 
         console.log('FFmpeg loaded successfully');
