@@ -22,17 +22,20 @@ async function loadFFmpeg() {
     loadingOverlay.classList.remove('hidden');
 
     try {
-        const { FFmpeg } = await import('https://unpkg.com/@ffmpeg/ffmpeg@0.12.10/dist/esm/index.js');
-        const { toBlobURL } = await import('https://unpkg.com/@ffmpeg/util@0.12.1/dist/esm/index.js');
+        const { FFmpeg } = await import('https://unpkg.com/@ffmpeg/ffmpeg@0.12.15/dist/esm/index.js');
+        const { toBlobURL } = await import('https://unpkg.com/@ffmpeg/util@0.12.2/dist/esm/index.js');
 
         ffmpeg = new FFmpeg();
 
-        const baseURL = 'https://unpkg.com/@ffmpeg/core@0.12.6/dist/esm';
-        const workerURL = 'https://unpkg.com/@ffmpeg/ffmpeg@0.12.10/dist/esm/worker.js';
+        const baseURL = 'https://unpkg.com/@ffmpeg/core@0.12.10/dist/esm';
+        const classWorkerURL = await toBlobURL(
+            'https://unpkg.com/@ffmpeg/ffmpeg@0.12.15/dist/esm/worker.js',
+            'text/javascript'
+        );
         await ffmpeg.load({
+            classWorkerURL,
             coreURL: await toBlobURL(`${baseURL}/ffmpeg-core.js`, 'text/javascript'),
             wasmURL: await toBlobURL(`${baseURL}/ffmpeg-core.wasm`, 'application/wasm'),
-            workerURL: await toBlobURL(workerURL, 'text/javascript'),
         });
 
         console.log('FFmpeg loaded successfully');
