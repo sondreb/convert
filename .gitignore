@@ -9,3 +9,4 @@ build/
 *.tmp
 generate-icons.js
 create-icons.html
+.codenomad

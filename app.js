@@ -11,9 +11,93 @@ const progressList = document.getElementById('progressList');
 const resultsSection = document.getElementById('resultsSection');
 const resultsList = document.getElementById('resultsList');
 const loadingOverlay = document.getElementById('loadingOverlay');
+const advancedToggle = document.getElementById('advancedToggle');
+const advancedSection = document.getElementById('advancedSection');
+const outputFormat = document.getElementById('outputFormat');
+const videoCodec = document.getElementById('videoCodec');
+const audioCodec = document.getElementById('audioCodec');
 
 let ffmpeg = null;
 let files = [];
+
+// Format-to-codec mapping for "auto" mode
+const FORMAT_DEFAULTS = {
+    mp4:  { video: 'libx264',     audio: 'aac' },
+    webm: { video: 'libvpx-vp9',  audio: 'libopus' },
+    avi:  { video: 'mpeg4',        audio: 'libmp3lame' },
+    mov:  { video: 'libx264',     audio: 'aac' },
+    mkv:  { video: 'libx264',     audio: 'aac' },
+    flv:  { video: 'libx264',     audio: 'aac' },
+    ts:   { video: 'mpeg2video',  audio: 'aac' },
+    mpg:  { video: 'mpeg2video',  audio: 'libmp3lame' },
+    gif:  { video: 'gif',         audio: null },
+    mp3:  { video: null,          audio: 'libmp3lame' },
+    wav:  { video: null,          audio: 'pcm_s16le' },
+    ogg:  { video: null,          audio: 'libvorbis' },
+    aac:  { video: null,          audio: 'aac' },
+    flac: { video: null,          audio: 'flac' },
+};
+
+const AUDIO_ONLY_FORMATS = ['mp3', 'wav', 'ogg', 'aac', 'flac'];
+
+// Toggle advanced section
+advancedToggle.addEventListener('click', () => {
+    advancedSection.classList.toggle('hidden');
+    advancedToggle.classList.toggle('open');
+});
+
+// Smart format/codec linking
+outputFormat.addEventListener('change', () => {
+    updateCodecDefaults();
+});
+
+function updateCodecDefaults() {
+    const format = outputFormat.value;
+    const isAudioOnly = AUDIO_ONLY_FORMATS.includes(format);
+
+    // Disable/enable video-related controls for audio-only formats
+    const videoOnlyIds = ['videoCodec', 'quality', 'resolution', 'framerate', 'videoBitrate', 'rotation', 'aspectRatio', 'preset', 'speed'];
+    videoOnlyIds.forEach((id) => {
+        const el = document.getElementById(id);
+        if (el) {
+            el.disabled = isAudioOnly;
+            el.closest('.setting-group').classList.toggle('disabled', isAudioOnly);
+        }
+    });
+
+    // If codec selects are on "auto", no need to change them — they resolve at convert time
+    // But update placeholder text if helpful
+    if (videoCodec.value === 'auto') {
+        const defaults = FORMAT_DEFAULTS[format];
+        const autoOption = videoCodec.querySelector('option[value="auto"]');
+        if (defaults && defaults.video) {
+            autoOption.textContent = `Auto (${defaults.video})`;
+        } else {
+            autoOption.textContent = 'Auto (none)';
+        }
+    }
+
+    if (audioCodec.value === 'auto') {
+        const defaults = FORMAT_DEFAULTS[format];
+        const autoOption = audioCodec.querySelector('option[value="auto"]');
+        if (defaults && defaults.audio) {
+            autoOption.textContent = `Auto (${defaults.audio})`;
+        } else {
+            autoOption.textContent = 'Auto (none)';
+        }
+    }
+
+    // For GIF, suggest lower framerate
+    if (format === 'gif') {
+        const framerate = document.getElementById('framerate');
+        if (!framerate.value) {
+            framerate.value = '10';
+        }
+    }
+}
+
+// Initialize codec hints
+updateCodecDefaults();
 
 // Initialize FFmpeg
 async function loadFFmpeg() {
@@ -53,8 +137,8 @@ async function loadFFmpeg() {
 if ('serviceWorker' in navigator) {
     window.addEventListener('load', () => {
         navigator.serviceWorker.register('/service-worker.js')
-            .then(reg => console.log('Service Worker registered'))
-            .catch(err => console.error('Service Worker registration failed:', err));
+            .then((reg) => console.log('Service Worker registered'))
+            .catch((err) => console.error('Service Worker registration failed:', err));
     });
 }
 
@@ -81,10 +165,10 @@ fileInput.addEventListener('change', (e) => {
 });
 
 function handleFiles(newFiles) {
-    const videoFiles = Array.from(newFiles).filter(file => file.type.startsWith('video/'));
+    const videoFiles = Array.from(newFiles).filter((file) => file.type.startsWith('video/') || file.type.startsWith('audio/'));
     
     if (videoFiles.length === 0) {
-        alert('Please select video files');
+        alert('Please select video or audio files');
         return;
     }
 
@@ -151,6 +235,23 @@ function formatFileSize(bytes) {
     return Math.round(bytes / Math.pow(k, i) * 100) / 100 + ' ' + sizes[i];
 }
 
+// Resolve "auto" codec to actual codec based on format
+function resolveVideoCodec(codec, format) {
+    if (codec === 'auto') {
+        const defaults = FORMAT_DEFAULTS[format];
+        return defaults ? defaults.video : 'libx264';
+    }
+    return codec;
+}
+
+function resolveAudioCodec(codec, format) {
+    if (codec === 'auto') {
+        const defaults = FORMAT_DEFAULTS[format];
+        return defaults ? defaults.audio : 'aac';
+    }
+    return codec;
+}
+
 // Convert button handler
 convertBtn.addEventListener('click', async () => {
     if (files.length === 0) return;
@@ -165,11 +266,29 @@ convertBtn.addEventListener('click', async () => {
     progressList.innerHTML = '';
     resultsList.innerHTML = '';
 
+    const format = outputFormat.value;
+    const isAudioOnly = AUDIO_ONLY_FORMATS.includes(format);
+
     const settings = {
-        format: document.getElementById('outputFormat').value,
-        codec: document.getElementById('videoCodec').value,
+        format: format,
+        codec: resolveVideoCodec(document.getElementById('videoCodec').value, format),
+        audioCodec: resolveAudioCodec(document.getElementById('audioCodec').value, format),
         quality: document.getElementById('quality').value,
-        resolution: document.getElementById('resolution').value
+        resolution: document.getElementById('resolution').value,
+        framerate: document.getElementById('framerate').value,
+        isAudioOnly: isAudioOnly,
+        // Advanced settings
+        videoBitrate: document.getElementById('videoBitrate').value,
+        audioBitrate: document.getElementById('audioBitrate').value,
+        sampleRate: document.getElementById('sampleRate').value,
+        audioChannels: document.getElementById('audioChannels').value,
+        speed: document.getElementById('speed').value,
+        rotation: document.getElementById('rotation').value,
+        aspectRatio: document.getElementById('aspectRatio').value,
+        preset: document.getElementById('preset').value,
+        trimStart: document.getElementById('trimStart').value.trim(),
+        trimEnd: document.getElementById('trimEnd').value.trim(),
+        customArgs: document.getElementById('customArgs').value.trim(),
     };
 
     const results = [];
@@ -197,37 +316,7 @@ async function convertVideo(file, settings, index) {
         await ffmpeg.writeFile(inputName, new Uint8Array(fileData));
 
         // Build FFmpeg command
-        const args = ['-i', inputName];
-
-        // Video codec
-        if (settings.codec !== 'copy') {
-            args.push('-c:v', settings.codec);
-            
-            // Quality settings
-            if (settings.codec === 'libx264' || settings.codec === 'libx265') {
-                const crf = settings.quality === 'high' ? '18' : settings.quality === 'medium' ? '23' : '28';
-                args.push('-crf', crf);
-            } else if (settings.codec === 'libvpx-vp9') {
-                const crf = settings.quality === 'high' ? '15' : settings.quality === 'medium' ? '31' : '45';
-                args.push('-crf', crf, '-b:v', '0');
-            }
-        } else {
-            args.push('-c:v', 'copy');
-        }
-
-        // Audio codec
-        if (settings.codec === 'copy') {
-            args.push('-c:a', 'copy');
-        } else {
-            args.push('-c:a', 'aac');
-        }
-
-        // Resolution
-        if (settings.resolution) {
-            args.push('-s', settings.resolution);
-        }
-
-        args.push(outputName);
+        const args = buildFFmpegArgs(inputName, outputName, settings);
 
         // Set up progress monitoring
         ffmpeg.on('progress', ({ progress }) => {
@@ -239,7 +328,8 @@ async function convertVideo(file, settings, index) {
 
         // Read output file
         const data = await ffmpeg.readFile(outputName);
-        const blob = new Blob([data.buffer], { type: `video/${settings.format}` });
+        const mimeType = settings.isAudioOnly ? `audio/${settings.format}` : `video/${settings.format}`;
+        const blob = new Blob([data.buffer], { type: mimeType });
         const url = URL.createObjectURL(blob);
 
         // Cleanup
@@ -263,6 +353,179 @@ async function convertVideo(file, settings, index) {
             error: error.message
         };
     }
+}
+
+function buildFFmpegArgs(inputName, outputName, settings) {
+    const args = [];
+
+    // Trim start (must come before -i for input seeking)
+    if (settings.trimStart && settings.trimStart !== '00:00:00') {
+        args.push('-ss', settings.trimStart);
+    }
+
+    args.push('-i', inputName);
+
+    // Trim end (duration/to — after input)
+    if (settings.trimEnd && settings.trimEnd !== '00:00:00') {
+        args.push('-to', settings.trimEnd);
+    }
+
+    // Build video filter chain
+    const videoFilters = [];
+
+    if (!settings.isAudioOnly) {
+        // --- Video codec ---
+        if (settings.codec === 'copy') {
+            args.push('-c:v', 'copy');
+        } else if (settings.format === 'gif') {
+            // GIF-specific pipeline: generate palette for quality
+            // Simple approach: just use default gif encoder
+            // For better quality, we'd need two-pass with palettegen, but that's complex in wasm
+        } else if (settings.codec) {
+            args.push('-c:v', settings.codec);
+
+            // Quality (CRF) — only when not using explicit video bitrate
+            if (!settings.videoBitrate) {
+                if (settings.codec === 'libx264' || settings.codec === 'libx265') {
+                    const crfMap = { highest: '15', high: '18', medium: '23', low: '28', lowest: '35' };
+                    args.push('-crf', crfMap[settings.quality] || '23');
+                } else if (settings.codec === 'libvpx-vp9') {
+                    const crfMap = { highest: '10', high: '15', medium: '31', low: '40', lowest: '50' };
+                    args.push('-crf', crfMap[settings.quality] || '31', '-b:v', '0');
+                } else if (settings.codec === 'mpeg4') {
+                    const qMap = { highest: '2', high: '3', medium: '5', low: '8', lowest: '12' };
+                    args.push('-q:v', qMap[settings.quality] || '5');
+                } else if (settings.codec === 'mpeg2video') {
+                    const qMap = { highest: '2', high: '3', medium: '5', low: '8', lowest: '12' };
+                    args.push('-q:v', qMap[settings.quality] || '5');
+                }
+            }
+
+            // Encoding preset (H.264 / H.265)
+            if (settings.preset && (settings.codec === 'libx264' || settings.codec === 'libx265')) {
+                args.push('-preset', settings.preset);
+            }
+        }
+
+        // Video bitrate (overrides CRF when set)
+        if (settings.videoBitrate) {
+            args.push('-b:v', settings.videoBitrate);
+        }
+
+        // Resolution
+        if (settings.resolution) {
+            args.push('-s', settings.resolution);
+        }
+
+        // Frame rate
+        if (settings.framerate) {
+            args.push('-r', settings.framerate);
+        }
+
+        // Aspect ratio
+        if (settings.aspectRatio) {
+            args.push('-aspect', settings.aspectRatio);
+        }
+
+        // Rotation / flip filters
+        if (settings.rotation) {
+            if (settings.rotation === '90') {
+                videoFilters.push('transpose=1');
+            } else if (settings.rotation === '180') {
+                videoFilters.push('transpose=1,transpose=1');
+            } else if (settings.rotation === '270') {
+                videoFilters.push('transpose=2');
+            } else if (settings.rotation === 'hflip') {
+                videoFilters.push('hflip');
+            } else if (settings.rotation === 'vflip') {
+                videoFilters.push('vflip');
+            }
+        }
+
+        // Speed adjustment (video)
+        if (settings.speed) {
+            const pts = 1 / parseFloat(settings.speed);
+            videoFilters.push(`setpts=${pts.toFixed(4)}*PTS`);
+        }
+    } else {
+        // Audio-only: no video stream
+        args.push('-vn');
+    }
+
+    // Apply video filter chain
+    if (videoFilters.length > 0) {
+        args.push('-vf', videoFilters.join(','));
+    }
+
+    // --- Audio codec ---
+    if (settings.audioCodec === 'none') {
+        args.push('-an');
+    } else if (settings.audioCodec === 'copy') {
+        args.push('-c:a', 'copy');
+    } else if (settings.codec === 'copy' && !settings.isAudioOnly) {
+        // When video is copy, default audio to copy too unless user specified
+        args.push('-c:a', 'copy');
+    } else if (settings.audioCodec) {
+        args.push('-c:a', settings.audioCodec);
+    }
+
+    // Audio bitrate
+    if (settings.audioBitrate && settings.audioCodec !== 'none' && settings.audioCodec !== 'copy') {
+        args.push('-b:a', settings.audioBitrate);
+    }
+
+    // Sample rate
+    if (settings.sampleRate && settings.audioCodec !== 'none' && settings.audioCodec !== 'copy') {
+        args.push('-ar', settings.sampleRate);
+    }
+
+    // Audio channels
+    if (settings.audioChannels && settings.audioCodec !== 'none' && settings.audioCodec !== 'copy') {
+        args.push('-ac', settings.audioChannels);
+    }
+
+    // Speed adjustment (audio) — must match video speed
+    if (settings.speed && settings.audioCodec !== 'none' && settings.audioCodec !== 'copy') {
+        const atempo = parseFloat(settings.speed);
+        // atempo filter only supports 0.5-100, chain for extreme values
+        const atempoFilters = buildAtempoChain(atempo);
+        if (atempoFilters) {
+            args.push('-af', atempoFilters);
+        }
+    }
+
+    // Custom FFmpeg arguments
+    if (settings.customArgs) {
+        const customParts = settings.customArgs.split(/\s+/).filter((s) => s.length > 0);
+        args.push(...customParts);
+    }
+
+    args.push(outputName);
+
+    return args;
+}
+
+// atempo filter supports 0.5 to 100.0; chain multiple for values outside range
+function buildAtempoChain(speed) {
+    if (speed === 1) return null;
+    const filters = [];
+    let remaining = speed;
+    if (remaining < 0.5) {
+        while (remaining < 0.5) {
+            filters.push('atempo=0.5');
+            remaining /= 0.5;
+        }
+        filters.push(`atempo=${remaining.toFixed(4)}`);
+    } else if (remaining > 100) {
+        while (remaining > 100) {
+            filters.push('atempo=100.0');
+            remaining /= 100;
+        }
+        filters.push(`atempo=${remaining.toFixed(4)}`);
+    } else {
+        filters.push(`atempo=${remaining.toFixed(4)}`);
+    }
+    return filters.join(',');
 }
 
 function createProgressItem(fileName, index) {
@@ -299,7 +562,7 @@ function showResults(results) {
     progressSection.classList.add('hidden');
     resultsSection.classList.remove('hidden');
 
-    results.forEach(result => {
+    results.forEach((result) => {
         const item = document.createElement('div');
         item.className = 'result-item';
 

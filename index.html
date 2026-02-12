@@ -3,9 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="Convert videos to different formats instantly in your browser">
+    <meta name="description" content="Convert videos and audio to different formats instantly in your browser">
     <meta name="theme-color" content="#0f172a">
-    <title>Convert - Video Converter</title>
+    <title>Convert - Media Converter</title>
     <link rel="stylesheet" href="styles.css">
     <link rel="manifest" href="manifest.json">
     <link rel="icon" type="image/svg+xml" href="icon.svg">
@@ -31,9 +31,9 @@
                     <polyline points="17 8 12 3 7 8"></polyline>
                     <line x1="12" y1="3" x2="12" y2="15"></line>
                 </svg>
-                <h2>Drop video files here</h2>
+                <h2>Drop video or audio files here</h2>
                 <p>or click to browse</p>
-                <input type="file" id="fileInput" multiple accept="video/*" hidden>
+                <input type="file" id="fileInput" multiple accept="video/*,audio/*" hidden>
             </div>
 
             <div id="filesSection" class="files-section hidden">
@@ -47,19 +47,38 @@
                     <div class="setting-group">
                         <label for="outputFormat">Format</label>
                         <select id="outputFormat">
-                            <option value="mp4">MP4 (H.264)</option>
-                            <option value="webm">WebM (VP9)</option>
-                            <option value="avi">AVI</option>
-                            <option value="mov">MOV</option>
+                            <optgroup label="Video">
+                                <option value="mp4">MP4 (H.264)</option>
+                                <option value="webm">WebM (VP9)</option>
+                                <option value="avi">AVI</option>
+                                <option value="mov">MOV</option>
+                                <option value="mkv">MKV (Matroska)</option>
+                                <option value="flv">FLV (Flash)</option>
+                                <option value="ts">MPEG-TS</option>
+                                <option value="mpg">MPEG</option>
+                            </optgroup>
+                            <optgroup label="Image Sequence">
+                                <option value="gif">GIF (Animated)</option>
+                            </optgroup>
+                            <optgroup label="Audio Only">
+                                <option value="mp3">MP3</option>
+                                <option value="wav">WAV</option>
+                                <option value="ogg">OGG (Vorbis)</option>
+                                <option value="aac">AAC</option>
+                                <option value="flac">FLAC</option>
+                            </optgroup>
                         </select>
                     </div>
 
                     <div class="setting-group">
                         <label for="videoCodec">Video Codec</label>
                         <select id="videoCodec">
+                            <option value="auto">Auto (recommended)</option>
                             <option value="libx264">H.264 (libx264)</option>
                             <option value="libvpx-vp9">VP9 (libvpx-vp9)</option>
                             <option value="libx265">H.265 (libx265)</option>
+                            <option value="mpeg4">MPEG-4</option>
+                            <option value="mpeg2video">MPEG-2</option>
                             <option value="copy">Copy (no re-encode)</option>
                         </select>
                     </div>
@@ -67,9 +86,11 @@
                     <div class="setting-group">
                         <label for="quality">Quality</label>
                         <select id="quality">
+                            <option value="highest">Highest (slow)</option>
                             <option value="high">High</option>
                             <option value="medium" selected>Medium</option>
                             <option value="low">Low</option>
+                            <option value="lowest">Lowest (fast)</option>
                         </select>
                     </div>
 
@@ -77,10 +98,169 @@
                         <label for="resolution">Resolution</label>
                         <select id="resolution">
                             <option value="">Original</option>
+                            <option value="3840x2160">4K (2160p)</option>
+                            <option value="2560x1440">1440p</option>
                             <option value="1920x1080">1080p</option>
                             <option value="1280x720">720p</option>
                             <option value="854x480">480p</option>
+                            <option value="640x360">360p</option>
+                            <option value="426x240">240p</option>
                         </select>
+                    </div>
+
+                    <div class="setting-group">
+                        <label for="audioCodec">Audio Codec</label>
+                        <select id="audioCodec">
+                            <option value="auto">Auto (recommended)</option>
+                            <option value="aac">AAC</option>
+                            <option value="libmp3lame">MP3 (LAME)</option>
+                            <option value="libvorbis">Vorbis</option>
+                            <option value="libopus">Opus</option>
+                            <option value="flac">FLAC</option>
+                            <option value="pcm_s16le">PCM 16-bit</option>
+                            <option value="copy">Copy (no re-encode)</option>
+                            <option value="none">No Audio</option>
+                        </select>
+                    </div>
+
+                    <div class="setting-group">
+                        <label for="framerate">Frame Rate</label>
+                        <select id="framerate">
+                            <option value="">Original</option>
+                            <option value="60">60 fps</option>
+                            <option value="30">30 fps</option>
+                            <option value="24">24 fps</option>
+                            <option value="15">15 fps</option>
+                            <option value="10">10 fps (GIF)</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="advanced-toggle" id="advancedToggle">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M6 9l6 6 6-6"/>
+                    </svg>
+                    Advanced Options
+                </div>
+
+                <div id="advancedSection" class="advanced-section hidden">
+                    <div class="settings-grid">
+                        <div class="setting-group">
+                            <label for="videoBitrate">Video Bitrate</label>
+                            <select id="videoBitrate">
+                                <option value="">Auto</option>
+                                <option value="8000k">8000 kbps (high)</option>
+                                <option value="5000k">5000 kbps</option>
+                                <option value="2500k">2500 kbps</option>
+                                <option value="1500k">1500 kbps</option>
+                                <option value="1000k">1000 kbps</option>
+                                <option value="500k">500 kbps</option>
+                                <option value="250k">250 kbps (low)</option>
+                            </select>
+                        </div>
+
+                        <div class="setting-group">
+                            <label for="audioBitrate">Audio Bitrate</label>
+                            <select id="audioBitrate">
+                                <option value="">Auto</option>
+                                <option value="320k">320 kbps</option>
+                                <option value="256k">256 kbps</option>
+                                <option value="192k">192 kbps</option>
+                                <option value="128k">128 kbps</option>
+                                <option value="96k">96 kbps</option>
+                                <option value="64k">64 kbps</option>
+                            </select>
+                        </div>
+
+                        <div class="setting-group">
+                            <label for="sampleRate">Audio Sample Rate</label>
+                            <select id="sampleRate">
+                                <option value="">Original</option>
+                                <option value="48000">48000 Hz</option>
+                                <option value="44100">44100 Hz</option>
+                                <option value="22050">22050 Hz</option>
+                                <option value="16000">16000 Hz</option>
+                                <option value="8000">8000 Hz</option>
+                            </select>
+                        </div>
+
+                        <div class="setting-group">
+                            <label for="audioChannels">Audio Channels</label>
+                            <select id="audioChannels">
+                                <option value="">Original</option>
+                                <option value="1">Mono</option>
+                                <option value="2">Stereo</option>
+                            </select>
+                        </div>
+
+                        <div class="setting-group">
+                            <label for="speed">Playback Speed</label>
+                            <select id="speed">
+                                <option value="">Normal (1x)</option>
+                                <option value="0.25">0.25x (slow)</option>
+                                <option value="0.5">0.5x</option>
+                                <option value="0.75">0.75x</option>
+                                <option value="1.5">1.5x</option>
+                                <option value="2">2x</option>
+                                <option value="4">4x (fast)</option>
+                            </select>
+                        </div>
+
+                        <div class="setting-group">
+                            <label for="rotation">Rotation</label>
+                            <select id="rotation">
+                                <option value="">None</option>
+                                <option value="90">90° clockwise</option>
+                                <option value="180">180°</option>
+                                <option value="270">90° counter-clockwise</option>
+                                <option value="hflip">Flip horizontal</option>
+                                <option value="vflip">Flip vertical</option>
+                            </select>
+                        </div>
+
+                        <div class="setting-group">
+                            <label for="aspectRatio">Aspect Ratio</label>
+                            <select id="aspectRatio">
+                                <option value="">Original</option>
+                                <option value="16:9">16:9</option>
+                                <option value="4:3">4:3</option>
+                                <option value="1:1">1:1 (square)</option>
+                                <option value="9:16">9:16 (vertical)</option>
+                                <option value="21:9">21:9 (ultrawide)</option>
+                            </select>
+                        </div>
+
+                        <div class="setting-group">
+                            <label for="preset">Encoding Preset</label>
+                            <select id="preset">
+                                <option value="">Default</option>
+                                <option value="ultrafast">Ultrafast</option>
+                                <option value="superfast">Superfast</option>
+                                <option value="veryfast">Very fast</option>
+                                <option value="fast">Fast</option>
+                                <option value="medium">Medium</option>
+                                <option value="slow">Slow (better quality)</option>
+                                <option value="veryslow">Very slow (best quality)</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="settings-grid trim-grid">
+                        <div class="setting-group">
+                            <label for="trimStart">Trim Start (HH:MM:SS)</label>
+                            <input type="text" id="trimStart" class="text-input" placeholder="00:00:00" pattern="[0-9]{2}:[0-9]{2}:[0-9]{2}">
+                        </div>
+
+                        <div class="setting-group">
+                            <label for="trimEnd">Trim End (HH:MM:SS)</label>
+                            <input type="text" id="trimEnd" class="text-input" placeholder="00:00:00" pattern="[0-9]{2}:[0-9]{2}:[0-9]{2}">
+                        </div>
+                    </div>
+
+                    <div class="setting-group custom-args-group">
+                        <label for="customArgs">Custom FFmpeg Arguments</label>
+                        <input type="text" id="customArgs" class="text-input" placeholder="e.g. -vf eq=brightness=0.06 -metadata title=MyVideo">
+                        <span class="setting-hint">Appended to the generated command. Use with caution.</span>
                     </div>
                 </div>
 

@@ -262,6 +262,111 @@ h3 {
     box-shadow: 0 0 0 3px var(--primary-glow);
 }
 
+/* Advanced options toggle */
+.advanced-toggle {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.65rem 0;
+    margin-bottom: 1.5rem;
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+    font-weight: 500;
+    cursor: pointer;
+    user-select: none;
+    transition: color 0.2s;
+}
+
+.advanced-toggle:hover {
+    color: var(--primary);
+}
+
+.advanced-toggle svg {
+    transition: transform 0.25s ease;
+    flex-shrink: 0;
+}
+
+.advanced-toggle.open svg {
+    transform: rotate(180deg);
+}
+
+.advanced-section {
+    margin-bottom: 1.5rem;
+    padding-top: 0.5rem;
+    border-top: 1px solid var(--border-light);
+    animation: slideDown 0.25s ease;
+}
+
+@keyframes slideDown {
+    from {
+        opacity: 0;
+        transform: translateY(-8px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.advanced-section .settings-grid {
+    margin-bottom: 1.25rem;
+}
+
+.trim-grid {
+    grid-template-columns: repeat(2, 1fr) !important;
+}
+
+/* Text inputs (trim, custom args) */
+.text-input {
+    padding: 0.65rem 0.75rem;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    font-size: 0.95rem;
+    background: var(--background);
+    color: var(--text);
+    transition: border-color 0.2s;
+    font-family: inherit;
+    width: 100%;
+}
+
+.text-input::placeholder {
+    color: var(--text-light);
+}
+
+.text-input:focus {
+    outline: none;
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px var(--primary-glow);
+}
+
+.custom-args-group {
+    margin-top: 0.25rem;
+}
+
+.setting-hint {
+    font-size: 0.75rem;
+    color: var(--text-light);
+    margin-top: 0.3rem;
+    display: block;
+}
+
+/* Disabled setting groups (audio-only mode) */
+.setting-group.disabled {
+    opacity: 0.35;
+    pointer-events: none;
+}
+
+.setting-group.disabled select,
+.setting-group.disabled input {
+    cursor: not-allowed;
+}
+
+/* Optgroup styling */
+.setting-group select optgroup {
+    font-weight: 600;
+    color: var(--text-secondary);
+}
+
 .convert-btn,
 .download-btn {
     width: 100%;
@@ -345,6 +450,10 @@ h3 {
     background: var(--success);
 }
 
+.download-btn svg {
+    color: white;
+}
+
 .download-btn:hover {
     background: #16a34a;
     box-shadow: 0 0 20px var(--success-glow);
@@ -370,6 +479,10 @@ h3 {
 
     .settings-grid {
         grid-template-columns: 1fr;
+    }
+
+    .trim-grid {
+        grid-template-columns: repeat(2, 1fr) !important;
     }
 }
 
@@ -501,6 +614,21 @@ h3 {
     .setting-group select {
         padding: 0.45rem 0.6rem;
         font-size: 0.85rem;
+    }
+
+    .text-input {
+        padding: 0.45rem 0.6rem;
+        font-size: 0.85rem;
+    }
+
+    .advanced-toggle {
+        font-size: 0.8rem;
+        padding: 0.4rem 0;
+        margin-bottom: 0.75rem;
+    }
+
+    .advanced-section {
+        margin-bottom: 0.75rem;
     }
 
     .convert-btn,

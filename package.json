@@ -1,0 +1,21 @@
+{
+  "name": "convert",
+  "version": "1.0.0",
+  "description": "A beautiful, simple Progressive Web App for converting videos to different formats using FFmpeg.wasm. Works entirely in your browser - no server uploads needed!",
+  "homepage": "https://github.com/sondreb/convert#readme",
+  "bugs": {
+    "url": "https://github.com/sondreb/convert/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/sondreb/convert.git"
+  },
+  "license": "MIT",
+  "author": "SondreB",
+  "type": "commonjs",
+  "main": "app.js",
+  "scripts": {
+    "start": "http-server -p 8181",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  }
+}
