@@ -21,7 +21,13 @@ self.addEventListener('install', (event) => {
         console.error('Cache install failed:', error, 'Failed assets:', ASSETS);
       })
   );
-  self.skipWaiting();
+});
+
+// Listen for skip waiting message from the app
+self.addEventListener('message', (event) => {
+  if (event.data && event.data.type === 'SKIP_WAITING') {
+    self.skipWaiting();
+  }
 });
 
 // Activate event - clean up old caches

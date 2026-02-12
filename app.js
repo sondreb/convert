@@ -133,12 +133,48 @@ async function loadFFmpeg() {
     }
 }
 
-// Register Service Worker
+// Register Service Worker and detect updates
 if ('serviceWorker' in navigator) {
     window.addEventListener('load', () => {
         navigator.serviceWorker.register('/service-worker.js')
-            .then((reg) => console.log('Service Worker registered'))
+            .then((reg) => {
+                console.log('Service Worker registered');
+
+                // If a new worker is already waiting, show the update button
+                if (reg.waiting) {
+                    showUpdateButton(reg.waiting);
+                }
+
+                // Watch for a new worker arriving
+                reg.addEventListener('updatefound', () => {
+                    const newWorker = reg.installing;
+                    newWorker.addEventListener('statechange', () => {
+                        if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+                            // New version installed but waiting — prompt user
+                            showUpdateButton(newWorker);
+                        }
+                    });
+                });
+            })
             .catch((err) => console.error('Service Worker registration failed:', err));
+
+        // When the new service worker takes over, reload the page
+        let refreshing = false;
+        navigator.serviceWorker.addEventListener('controllerchange', () => {
+            if (!refreshing) {
+                refreshing = true;
+                window.location.reload();
+            }
+        });
+    });
+}
+
+function showUpdateButton(worker) {
+    const updateBtn = document.getElementById('updateBtn');
+    updateBtn.classList.remove('hidden');
+    updateBtn.addEventListener('click', () => {
+        worker.postMessage({ type: 'SKIP_WAITING' });
+        updateBtn.classList.add('hidden');
     });
 }
 

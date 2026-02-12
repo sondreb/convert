@@ -70,6 +70,37 @@ header h1 svg {
     color: var(--primary);
 }
 
+/* Update available button */
+.update-btn {
+    background: none;
+    border: none;
+    color: var(--accent);
+    cursor: pointer;
+    padding: 0.35rem;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.2s, transform 0.2s;
+    animation: pulse-update 2s ease-in-out infinite;
+    margin-left: 0.25rem;
+}
+
+.update-btn:hover {
+    background: rgba(6, 182, 212, 0.15);
+    transform: scale(1.15);
+    animation: none;
+}
+
+.update-btn svg {
+    color: var(--accent) !important;
+}
+
+@keyframes pulse-update {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.5; }
+}
+
 footer {
     text-align: center;
     margin-top: 2.5rem;
