@@ -12,6 +12,14 @@ A beautiful, simple Progressive Web App for converting videos to different forma
 - 🎯 Drag & drop support for multiple files
 - ⚙️ Customizable quality and resolution settings
 
+## Screenshots
+
+![Drag and drop files to convert](screenshots/02-drag-over.png)
+
+![Files loaded with conversion settings](screenshots/03-files-loaded.png)
+
+![Conversion complete with download buttons](screenshots/08-conversion-complete.png)
+
 ## Usage
 
 1. Visit the app (will be deployed to GitHub Pages)

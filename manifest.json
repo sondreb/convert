@@ -20,5 +20,28 @@
       "type": "image/png",
       "purpose": "any"
     }
+  ],
+  "screenshots": [
+    {
+      "src": "screenshots/02-drag-over.png",
+      "sizes": "2560x1800",
+      "type": "image/png",
+      "form_factor": "wide",
+      "label": "Drag and drop files to convert"
+    },
+    {
+      "src": "screenshots/03-files-loaded.png",
+      "sizes": "2560x2640",
+      "type": "image/png",
+      "form_factor": "wide",
+      "label": "Files loaded with conversion settings"
+    },
+    {
+      "src": "screenshots/08-conversion-complete.png",
+      "sizes": "2560x3602",
+      "type": "image/png",
+      "form_factor": "wide",
+      "label": "Conversion complete with download buttons"
+    }
   ]
 }
